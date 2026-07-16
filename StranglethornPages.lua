@@ -1,6 +1,6 @@
 local addonName = ...
 
-local debug = true
+local debug = false
 
 local frameWidth = 200
 local frameBaseHeight = 148
