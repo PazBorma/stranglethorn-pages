@@ -96,6 +96,20 @@ for chapterNumber, chapterData in pairs(chapters) do
     end
 end
 
+StvPages.chapterQuestCompleted = StvPages.chapterQuestCompleted or {}
+
+local function isChapterQuestCompleted(chapter)
+    return StvPages.chapterQuestCompleted[chapter] or false
+end
+
+local function updateChapterQuestCompleted()
+    for chapter, data in pairs(chapters) do
+        if not isChapterQuestCompleted(chapter) then
+            StvPages.chapterQuestCompleted[chapter] = C_QuestLog.IsQuestFlaggedCompleted(data.questID)
+        end
+    end
+end
+
 local function ensureSettings()
     StranglethornPagesDB = StranglethornPagesDB or {}
 
@@ -367,7 +381,7 @@ local function getChapterInfo(chapterNumber)
         missingPages = {},
     }
 
-    if C_QuestLog.IsQuestFlaggedCompleted(chapterData.questID) then
+    if isChapterQuestCompleted(chapterNumber) then
         info.state = "DONE"
         return info
     end
@@ -530,6 +544,7 @@ local eventActions = {
             end
         end
 
+        updateChapterQuestCompleted()
         StvPages.setFrameVisible(getSettings().frameVisible)
 
         StvPages.frame:RegisterEvent("BAG_UPDATE_DELAYED")
@@ -556,6 +571,7 @@ local eventActions = {
         refreshAllData()
     end,
     ["QUEST_LOG_UPDATE"] = function()
+        updateChapterQuestCompleted()
         refreshDisplay()
     end,
 }
@@ -565,9 +581,9 @@ local function HandleEvent(_frame, event, ...)
         print(event)
     end
 
-    if event == "ADDON_LOADED" then
-        eventActions[event](...)
-    elseif getSettings().frameVisible then
+    local instantEvents = { ADDON_LOADED = true, QUEST_LOG_UPDATE = true }
+
+    if instantEvents[event] or getSettings().frameVisible then
         eventActions[event](...)
     end
 end
@@ -583,8 +599,8 @@ local function tooltip(tooltip)
         return
     end
 
-    local pageInfo = trackedPageIDs[itemID]
-    if not pageInfo then
+    local page = trackedPageIDs[itemID]
+    if not page then
         return
     end
 
@@ -598,15 +614,14 @@ local function tooltip(tooltip)
         return
     end
 
-    local chapterData = chapters[pageInfo.chapter]
-    if chapterData and C_QuestLog.IsQuestFlaggedCompleted(chapterData.questID) then
-        tooltip:AddLine(colored("Chapter " .. pageInfo.chapter .. " completed", tooltipStatusColors.NOT_NEEDED))
+    if isChapterQuestCompleted(page.chapter) then
+        tooltip:AddLine(colored("Chapter " .. page.chapter .. " completed", tooltipStatusColors.NOT_NEEDED))
     elseif StvPages.hasItemInBags(itemID) then
         tooltip:AddLine(colored("Already in bags", tooltipStatusColors.NOT_NEEDED))
     elseif StvPages.hasItemInBank(itemID) then
         tooltip:AddLine(colored("Already in bank", tooltipStatusColors.NOT_NEEDED))
     else
-        tooltip:AddLine(colored("Needed for chapter " .. pageInfo.chapter, tooltipStatusColors.NEEDED))
+        tooltip:AddLine(colored("Needed for chapter " .. page.chapter, tooltipStatusColors.NEEDED))
     end
 
     tooltip:Show()
