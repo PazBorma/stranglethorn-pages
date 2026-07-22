@@ -606,7 +606,7 @@ local function tooltip(tooltip)
     elseif StvPages.hasItemInBank(itemID) then
         tooltip:AddLine(colored("Already in bank", tooltipStatusColors.NOT_NEEDED))
     else
-        tooltip:AddLine(colored("Needed for chapter " .. pageInfo.chapter .. ", page " .. pageInfo.pageNumber, tooltipStatusColors.NEEDED))
+        tooltip:AddLine(colored("Needed for chapter " .. pageInfo.chapter, tooltipStatusColors.NEEDED))
     end
 
     tooltip:Show()

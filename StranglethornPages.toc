@@ -1,8 +1,9 @@
-## Interface: 11403
+## Interface: 11509
 ## Title: Stranglethorn Pages
 ## Notes: Tracks Green Hills of Stranglethorn chapter pages in your bags.
-## Version: 0.0.1
+## Version: 0.0.3
 ## SavedVariables: StranglethornPagesDB
+## IconTexture: Interface\AddOns\StranglethornPages\icon.png
 
 utils.lua
 StranglethornPages.lua
